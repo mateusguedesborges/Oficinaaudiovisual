@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oficina de Audiovisual Urbano</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #1a202c;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 90%;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        input, textarea, button, select {
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease-in-out;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+        button {
+            background-color: #38a169;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2f855a;
+        }
+        #message-box {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #48bb78;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #message-box.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+    <div id="message-box" class="hidden"></div>
+
+    <div class="container flex flex-col items-center justify-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-center mb-8 text-gray-800">
+            Olhar da Cidade
+        </h1>
+
+        <!-- Splash Screen -->
+        <div id="splash-screen" class="card text-center transition-opacity duration-500 ease-in-out">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">Bem-vindo(a) à Oficina!</h2>
+            <p class="mb-6 text-gray-600">Vamos explorar as narrativas que a praça nos oferece. Use este app para criar e compartilhar sua história visual.</p>
+            <p class="mb-6 text-gray-600 font-bold">Aproveite a oficina!</p>
+            <button id="start-btn">Começar</button>
+        </div>
+
+        <!-- Main App Screen -->
+        <div id="app-screen" class="hidden w-full transition-opacity duration-500 ease-in-out">
+            <div id="creation-section" class="card">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Seu Roteiro Invisível</h2>
+                <p class="text-gray-600 mb-4">Responda às 3 perguntas para sua história visual e capture uma imagem da sua cena.</p>
+                <div class="mb-4">
+                    <label for="quem-input" class="block text-gray-700 font-medium mb-1">Quem?</label>
+                    <input type="text" id="quem-input" placeholder="Quem é o personagem da sua história?">
+                </div>
+                <div class="mb-4">
+                    <label for="que-input" class="block text-gray-700 font-medium mb-1">O Quê?</label>
+                    <input type="text" id="que-input" placeholder="O que ele(a) está fazendo?">
+                </div>
+                <div class="mb-4">
+                    <label for="por-que-input" class="block text-gray-700 font-medium mb-1">Por Quê?</label>
+                    <textarea id="por-que-input" rows="3" placeholder="Qual a emoção ou a mensagem que você quer passar?"></textarea>
+                </div>
+                
+                <div class="mb-4 text-center">
+                    <video id="camera-preview" class="w-full rounded-lg mb-2" autoplay></video>
+                    <canvas id="camera-canvas" class="hidden"></canvas>
+                    <button id="capture-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full">
+                        Tirar Foto
+                    </button>
+                    <img id="captured-image" class="hidden w-full rounded-lg mt-4" alt="Imagem Capturada">
+                </div>
+                
+                <button id="save-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold">Salvar História</button>
+            </div>
+
+            <div id="gallery-section" class="card mt-8">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700 text-center">Histórias da Oficina</h2>
+                <div id="gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <p class="text-center text-gray-500" id="loading-text">Carregando histórias...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+        // Set log level for debugging
+        setLogLevel('debug');
+
+        // These variables will be replaced by the environment during runtime.
+        const __app_id = 'default-app-id';
+        const __firebase_config = '{}'; // Simplified fallback
+        const __initial_auth_token = '';
+
+        let db, auth, userId;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+        console.log('Final Firebase Config:', firebaseConfig);
+        console.log('Initial auth token:', __initial_auth_token);
+
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        // UI elements
+        const splashScreen = document.getElementById('splash-screen');
+        const appScreen = document.getElementById('app-screen');
+        const startBtn = document.getElementById('start-btn');
+        const quemInput = document.getElementById('quem-input');
+        const queInput = document.getElementById('que-input');
+        const porQueInput = document.getElementById('por-que-input');
+        const saveBtn = document.getElementById('save-btn');
+        const gallery = document.getElementById('gallery');
+        const loadingText = document.getElementById('loading-text');
+        const messageBox = document.getElementById('message-box');
+
+        // Camera elements
+        const cameraPreview = document.getElementById('camera-preview');
+        const cameraCanvas = document.getElementById('camera-canvas');
+        const captureBtn = document.getElementById('capture-btn');
+        const capturedImage = document.getElementById('captured-image');
+        let stream = null;
+
+        // Firebase authentication
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                setupRealtimeListener();
+            } else {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Firebase Auth Error:", error);
+                    showMessage("Erro de autenticação. Tente novamente mais tarde.", "error");
+                }
+            }
+        });
+
+        startBtn.addEventListener('click', () => {
+            splashScreen.classList.add('opacity-0');
+            setTimeout(() => {
+                splashScreen.classList.add('hidden');
+                appScreen.classList.remove('hidden');
+                appScreen.classList.add('opacity-100');
+                startCamera();
+            }, 500);
+        });
+
+        captureBtn.addEventListener('click', () => {
+            if (stream) {
+                const context = cameraCanvas.getContext('2d');
+                cameraCanvas.width = cameraPreview.videoWidth;
+                cameraCanvas.height = cameraPreview.videoHeight;
+                context.drawImage(cameraPreview, 0, 0, cameraCanvas.width, cameraCanvas.height);
+                const imageDataUrl = cameraCanvas.toDataURL('image/jpeg', 0.8);
+                capturedImage.src = imageDataUrl;
+                capturedImage.classList.remove('hidden');
+                cameraPreview.classList.add('hidden');
+                captureBtn.textContent = 'Tirar Outra Foto';
+                stopCamera();
+            }
+        });
+
+        // Event listener for "Tirar Outra Foto"
+        captureBtn.addEventListener('click', () => {
+            if (capturedImage.classList.contains('hidden')) {
+                // If it's a new photo
+                if (stream) {
+                    const context = cameraCanvas.getContext('2d');
+                    cameraCanvas.width = cameraPreview.videoWidth;
+                    cameraCanvas.height = cameraPreview.videoHeight;
+                    context.drawImage(cameraPreview, 0, 0, cameraCanvas.width, cameraCanvas.height);
+                    const imageDataUrl = cameraCanvas.toDataURL('image/jpeg', 0.8);
+                    capturedImage.src = imageDataUrl;
+                    capturedImage.classList.remove('hidden');
+                    cameraPreview.classList.add('hidden');
+                    captureBtn.textContent = 'Tirar Outra Foto';
+                    stopCamera();
+                }
+            } else {
+                // If it's retaking a photo
+                capturedImage.classList.add('hidden');
+                cameraPreview.classList.remove('hidden');
+                captureBtn.textContent = 'Tirar Foto';
+                startCamera();
+            }
+        });
+
+        saveBtn.addEventListener('click', async () => {
+            const quem = quemInput.value.trim();
+            const que = queInput.value.trim();
+            const porQue = porQueInput.value.trim();
+            const imagem = capturedImage.src;
+
+            if (!quem || !que || !porQue || !imagem || imagem.includes('placeholder')) {
+                showMessage("Por favor, preencha todos os campos e capture uma imagem.", "error");
+                return;
+            }
+
+            try {
+                // Public data path to be shared among all users of the app
+                const collectionPath = `artifacts/${appId}/public/data/historias`;
+                await addDoc(collection(db, collectionPath), {
+                    quem,
+                    que,
+                    porQue,
+                    imagem,
+                    userId, // Store the userId of the creator
+                    createdAt: serverTimestamp()
+                });
+                showMessage("História salva com sucesso!");
+                quemInput.value = '';
+                queInput.value = '';
+                porQueInput.value = '';
+                capturedImage.src = '';
+                capturedImage.classList.add('hidden');
+                cameraPreview.classList.remove('hidden');
+                captureBtn.textContent = 'Tirar Foto';
+                startCamera();
+            } catch (e) {
+                console.error("Erro ao adicionar documento: ", e);
+                showMessage("Erro ao salvar a história.", "error");
+            }
+        });
+
+        // Set up real-time listener for gallery
+        function setupRealtimeListener() {
+            const collectionPath = `artifacts/${appId}/public/data/historias`;
+            const q = query(collection(db, collectionPath));
+
+            onSnapshot(q, (querySnapshot) => {
+                gallery.innerHTML = '';
+                if (querySnapshot.empty) {
+                    gallery.innerHTML = '<p class="text-center text-gray-500">Nenhuma história ainda. Seja o primeiro a criar!</p>';
+                } else {
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const storyCard = document.createElement('div');
+                        storyCard.className = 'card';
+                        storyCard.innerHTML = `
+                            <img src="${data.imagem}" alt="Imagem capturada" class="w-full h-48 object-cover rounded-lg mb-4">
+                            <h3 class="text-xl font-semibold mb-2 text-gray-800">${data.quem}</h3>
+                            <p class="text-gray-600 font-medium">${data.que}</p>
+                            <p class="text-gray-500 text-sm mt-2">${data.porQue}</p>
+                            <p class="text-gray-400 text-xs mt-4">Criado por: ${data.userId}</p>
+                        `;
+                        gallery.appendChild(storyCard);
+                    });
+                }
+                loadingText.classList.add('hidden');
+            }, (error) => {
+                console.error("Erro ao carregar histórias: ", error);
+                loadingText.textContent = "Erro ao carregar histórias.";
+            });
+        }
+        
+        // Helper function for message box
+        function showMessage(msg, type = "success") {
+            messageBox.textContent = msg;
+            messageBox.style.backgroundColor = type === "success" ? "#48bb78" : "#f56565";
+            messageBox.classList.remove("hidden");
+            messageBox.classList.add("show");
+            setTimeout(() => {
+                messageBox.classList.remove("show");
+                setTimeout(() => {
+                    messageBox.classList.add("hidden");
+                }, 500);
+            }, 3000);
+        }
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                cameraPreview.srcObject = stream;
+            } catch (err) {
+                console.error("Erro ao acessar a câmera: ", err);
+                showMessage("Não foi possível acessar a câmera.", "error");
+            }
+        }
+        
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+    </script>
+</body>
+</html>
