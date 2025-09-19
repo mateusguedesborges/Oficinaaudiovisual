@@ -1,115 +1,64 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oficina de Audiovisual Urbano</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Oficina de Audiovisual Urbano — Olhar da Cidade</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
-            color: #1a202c;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 90%;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-        .card {
-            background-color: white;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        input, textarea, button, select {
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            margin-top: 0.5rem;
-            width: 100%;
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s ease-in-out;
-        }
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #3182ce;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
-        }
-        button {
-            background-color: #38a169;
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #2f855a;
-        }
-        #message-box {
-            position: fixed;
-            top: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #48bb78;
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-        #message-box.show {
-            opacity: 1;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; color: #1a202c; line-height: 1.6; }
+        .container { max-width: 90%; margin: 0 auto; padding: 1.5rem; }
+        .card { background-color: white; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
+        input, textarea, button, select { border-radius: 0.5rem; padding: 0.75rem; margin-top: 0.5rem; width: 100%; border: 1px solid #e2e8f0; transition: all 0.2s ease-in-out; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(66,153,225,0.5); }
+        button { background-color: #38a169; color: white; font-weight: 700; cursor: pointer; }
+        button:hover { background-color: #2f855a; }
+        #message-box { position: fixed; top: 2rem; left: 50%; transform: translateX(-50%); background-color: #48bb78; color: white; padding: 1rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; opacity: 0; transition: opacity 0.5s ease-in-out; }
+        #message-box.show { opacity: 1; }
+        video, img { max-height: 400px; object-fit: cover; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
-
-    <div id="message-box" class="hidden"></div>
+    <div id="message-box" class="hidden" role="status" aria-live="polite"></div>
 
     <div class="container flex flex-col items-center justify-center">
-        <h1 class="text-4xl md:text-5xl font-bold text-center mb-8 text-gray-800">
-            Olhar da Cidade
-        </h1>
+        <h1 class="text-4xl md:text-5xl font-bold text-center mb-8 text-gray-800">Olhar da Cidade</h1>
 
         <!-- Splash Screen -->
         <div id="splash-screen" class="card text-center transition-opacity duration-500 ease-in-out">
             <h2 class="text-2xl font-semibold mb-4 text-gray-700">Bem-vindo(a) à Oficina!</h2>
             <p class="mb-6 text-gray-600">Vamos explorar as narrativas que a praça nos oferece. Use este app para criar e compartilhar sua história visual.</p>
             <p class="mb-6 text-gray-600 font-bold">Aproveite a oficina!</p>
-            <button id="start-btn">Começar</button>
+            <button id="start-btn" class="px-6 py-2">Começar</button>
         </div>
 
         <!-- Main App Screen -->
         <div id="app-screen" class="hidden w-full transition-opacity duration-500 ease-in-out">
-            <div id="creation-section" class="card">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-700">Seu Roteiro Invisível</h2>
+            <div id="creation-section" class="card" aria-labelledby="section-title">
+                <h2 id="section-title" class="text-2xl font-semibold mb-4 text-gray-700">Seu Roteiro Invisível</h2>
                 <p class="text-gray-600 mb-4">Responda às 3 perguntas para sua história visual e capture uma imagem da sua cena.</p>
+
                 <div class="mb-4">
                     <label for="quem-input" class="block text-gray-700 font-medium mb-1">Quem?</label>
-                    <input type="text" id="quem-input" placeholder="Quem é o personagem da sua história?">
+                    <input type="text" id="quem-input" placeholder="Quem é o personagem da sua história?" />
                 </div>
                 <div class="mb-4">
                     <label for="que-input" class="block text-gray-700 font-medium mb-1">O Quê?</label>
-                    <input type="text" id="que-input" placeholder="O que ele(a) está fazendo?">
+                    <input type="text" id="que-input" placeholder="O que ele(a) está fazendo?" />
                 </div>
                 <div class="mb-4">
                     <label for="por-que-input" class="block text-gray-700 font-medium mb-1">Por Quê?</label>
                     <textarea id="por-que-input" rows="3" placeholder="Qual a emoção ou a mensagem que você quer passar?"></textarea>
                 </div>
-                
+
                 <div class="mb-4 text-center">
-                    <video id="camera-preview" class="w-full rounded-lg mb-2" autoplay></video>
-                    <canvas id="camera-canvas" class="hidden"></canvas>
-                    <button id="capture-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full">
-                        Tirar Foto
-                    </button>
-                    <img id="captured-image" class="hidden w-full rounded-lg mt-4" alt="Imagem Capturada">
+                    <video id="camera-preview" class="w-full rounded-lg mb-2 hidden" autoplay playsinline></video>
+                    <canvas id="camera-canvas" class="hidden" aria-hidden="true"></canvas>
+                    <button id="capture-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full">Iniciar Câmera</button>
+                    <img id="captured-image" class="hidden w-full rounded-lg mt-4" alt="Imagem Capturada" />
                 </div>
-                
+
                 <button id="save-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold">Salvar História</button>
             </div>
 
@@ -120,55 +69,92 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase + App logic -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    // -------------------------
+    // Imports Firebase (modular)
+    // -------------------------
+    import { initializeApp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Set log level for debugging
-        setLogLevel('debug');
+    // Ajuda no debug
+    setLogLevel('debug');
 
-        // These variables will be replaced by the environment during runtime.
-        const __app_id = 'default-app-id';
-        const __firebase_config = '{}'; // Simplified fallback
-        const __initial_auth_token = '';
+    // -------------------------
+    // Variáveis de configuração
+    // -------------------------
+    // Substitua os placeholders abaixo pelo JSON de configuração do seu projeto Firebase
+    const __app_id = 'default-app-id';
+    const __firebase_config = ''; // EX: '{"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}'
+    const __initial_auth_token = ''; // opcional, se usar token custom
 
-        let db, auth, userId;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    // -------------------------
+    // Elementos da UI
+    // -------------------------
+    const splashScreen = document.getElementById('splash-screen');
+    const appScreen = document.getElementById('app-screen');
+    const startBtn = document.getElementById('start-btn');
+    const quemInput = document.getElementById('quem-input');
+    const queInput = document.getElementById('que-input');
+    const porQueInput = document.getElementById('por-que-input');
+    const saveBtn = document.getElementById('save-btn');
+    const gallery = document.getElementById('gallery');
+    const loadingText = document.getElementById('loading-text');
+    const messageBox = document.getElementById('message-box');
 
-        console.log('Final Firebase Config:', firebaseConfig);
-        console.log('Initial auth token:', __initial_auth_token);
+    // Camera
+    const cameraPreview = document.getElementById('camera-preview');
+    const cameraCanvas = document.getElementById('camera-canvas');
+    const captureBtn = document.getElementById('capture-btn');
+    const capturedImage = document.getElementById('captured-image');
+    let stream = null;
 
-        const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
+    let db = null, auth = null, userId = null;
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    let isFirebaseReady = false;
 
-        // UI elements
-        const splashScreen = document.getElementById('splash-screen');
-        const appScreen = document.getElementById('app-screen');
-        const startBtn = document.getElementById('start-btn');
-        const quemInput = document.getElementById('quem-input');
-        const queInput = document.getElementById('que-input');
-        const porQueInput = document.getElementById('por-que-input');
-        const saveBtn = document.getElementById('save-btn');
-        const gallery = document.getElementById('gallery');
-        const loadingText = document.getElementById('loading-text');
-        const messageBox = document.getElementById('message-box');
+    // -------------------------
+    // Função de mensagem (UI)
+    // -------------------------
+    function showMessage(msg, type = "success") {
+        messageBox.textContent = msg;
+        messageBox.style.backgroundColor = type === "success" ? "#48bb78" : "#f56565";
+        messageBox.classList.remove("hidden");
+        messageBox.classList.add("show");
+        // remove depois de 3s
+        setTimeout(() => {
+            messageBox.classList.remove("show");
+            setTimeout(() => messageBox.classList.add("hidden"), 500);
+        }, 3000);
+    }
 
-        // Camera elements
-        const cameraPreview = document.getElementById('camera-preview');
-        const cameraCanvas = document.getElementById('camera-canvas');
-        const captureBtn = document.getElementById('capture-btn');
-        const capturedImage = document.getElementById('captured-image');
-        let stream = null;
+    // -------------------------
+    // Inicializa Firebase (se houver config)
+    // -------------------------
+    try {
+        if (typeof __firebase_config !== 'undefined' && __firebase_config !== '') {
+            const firebaseConfig = JSON.parse(__firebase_config);
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            isFirebaseReady = true;
+            console.log('Firebase iniciado:', firebaseConfig);
+        } else {
+            console.warn("Firebase config não fornecida - rodando em modo offline.");
+            showMessage("Acesso offline. A galeria não estará disponível.", "error");
+        }
+    } catch (e) {
+        console.error("Erro ao inicializar Firebase:", e);
+        showMessage("Erro ao inicializar o app. Tente novamente mais tarde.", "error");
+    }
 
-        // Firebase authentication
+    // -------------------------
+    // Auth + Listener realtime
+    // -------------------------
+    if (isFirebaseReady) {
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
@@ -186,155 +172,173 @@
                 }
             }
         });
+    }
 
-        startBtn.addEventListener('click', () => {
-            splashScreen.classList.add('opacity-0');
-            setTimeout(() => {
-                splashScreen.classList.add('hidden');
-                appScreen.classList.remove('hidden');
-                appScreen.classList.add('opacity-100');
-                startCamera();
-            }, 500);
-        });
+    // -------------------------
+    // Funções de Câmera
+    // -------------------------
+    async function startCamera() {
+        // Requisitos: HTTPS ou localhost
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showMessage("Câmera não disponível (precisa de HTTPS ou localhost).", "error");
+            return;
+        }
+        try {
+            // usar facingMode ambiente e largura ideal 1280 para boa resolução
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 } }, audio: false });
+            cameraPreview.srcObject = stream;
+            await cameraPreview.play();
+            cameraPreview.classList.remove('hidden');
+            capturedImage.classList.add('hidden');
+            captureBtn.textContent = 'Tirar Foto';
+        } catch (err) {
+            console.error("Erro ao acessar a câmera:", err);
+            showMessage("Permissão negada ou câmera indisponível.", "error");
+        }
+    }
 
-        captureBtn.addEventListener('click', () => {
-            if (stream) {
-                const context = cameraCanvas.getContext('2d');
-                cameraCanvas.width = cameraPreview.videoWidth;
-                cameraCanvas.height = cameraPreview.videoHeight;
-                context.drawImage(cameraPreview, 0, 0, cameraCanvas.width, cameraCanvas.height);
-                const imageDataUrl = cameraCanvas.toDataURL('image/jpeg', 0.8);
-                capturedImage.src = imageDataUrl;
-                capturedImage.classList.remove('hidden');
-                cameraPreview.classList.add('hidden');
-                captureBtn.textContent = 'Tirar Outra Foto';
-                stopCamera();
-            }
-        });
+    function stopCamera() {
+        if (!stream) return;
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+        cameraPreview.srcObject = null;
+    }
 
-        // Event listener for "Tirar Outra Foto"
-        captureBtn.addEventListener('click', () => {
-            if (capturedImage.classList.contains('hidden')) {
-                // If it's a new photo
-                if (stream) {
-                    const context = cameraCanvas.getContext('2d');
-                    cameraCanvas.width = cameraPreview.videoWidth;
-                    cameraCanvas.height = cameraPreview.videoHeight;
-                    context.drawImage(cameraPreview, 0, 0, cameraCanvas.width, cameraCanvas.height);
-                    const imageDataUrl = cameraCanvas.toDataURL('image/jpeg', 0.8);
-                    capturedImage.src = imageDataUrl;
-                    capturedImage.classList.remove('hidden');
-                    cameraPreview.classList.add('hidden');
-                    captureBtn.textContent = 'Tirar Outra Foto';
-                    stopCamera();
-                }
-            } else {
-                // If it's retaking a photo
-                capturedImage.classList.add('hidden');
-                cameraPreview.classList.remove('hidden');
-                captureBtn.textContent = 'Tirar Foto';
-                startCamera();
-            }
-        });
+    // -------------------------
+    // Eventos UI
+    // -------------------------
+    startBtn.addEventListener('click', () => {
+        splashScreen.classList.add('opacity-0');
+        setTimeout(() => {
+            splashScreen.classList.add('hidden');
+            appScreen.classList.remove('hidden');
+            appScreen.classList.add('opacity-100');
+            // não inicializa a câmera automaticamente para dar controle ao usuário
+        }, 500);
+    });
 
-        saveBtn.addEventListener('click', async () => {
-            const quem = quemInput.value.trim();
-            const que = queInput.value.trim();
-            const porQue = porQueInput.value.trim();
-            const imagem = capturedImage.src;
+    // Handler único para o botão de captura / iniciar / tirar outra
+    captureBtn.addEventListener('click', async () => {
+        // Se já temos imagem exibida -> retomar câmera
+        if (!capturedImage.classList.contains('hidden')) {
+            capturedImage.classList.add('hidden');
+            cameraPreview.classList.remove('hidden');
+            captureBtn.textContent = 'Tirar Foto';
+            await startCamera();
+            return;
+        }
 
-            if (!quem || !que || !porQue || !imagem || imagem.includes('placeholder')) {
-                showMessage("Por favor, preencha todos os campos e capture uma imagem.", "error");
+        // Se não há stream -> inicia a câmera
+        if (!stream) {
+            await startCamera();
+            return;
+        }
+
+        // Se stream ativo -> capturar foto
+        const context = cameraCanvas.getContext('2d');
+        // ajustar canvas para dimensão do vídeo
+        cameraCanvas.width = cameraPreview.videoWidth || 1280;
+        cameraCanvas.height = cameraPreview.videoHeight || Math.floor(cameraCanvas.width * 9 / 16);
+        context.drawImage(cameraPreview, 0, 0, cameraCanvas.width, cameraCanvas.height);
+        const imageDataUrl = cameraCanvas.toDataURL('image/jpeg', 0.8);
+        capturedImage.src = imageDataUrl;
+        capturedImage.classList.remove('hidden');
+        cameraPreview.classList.add('hidden');
+        captureBtn.textContent = 'Tirar Outra Foto';
+        // para liberar câmera
+        stopCamera();
+    });
+
+    // Salvar história no Firestore
+    saveBtn.addEventListener('click', async () => {
+        if (!isFirebaseReady) {
+            showMessage("Conexão offline. Não é possível salvar a história.", "error");
+            return;
+        }
+
+        const quem = quemInput.value.trim();
+        const que = queInput.value.trim();
+        const porQue = porQueInput.value.trim();
+        const imagem = capturedImage.src;
+
+        if (!quem || !que || !porQue || !imagem || !imagem.startsWith('data:image')) {
+            showMessage("Por favor, preencha todos os campos e capture uma imagem.", "error");
+            return;
+        }
+
+        try {
+            const collectionPath = `artifacts/${appId}/public/data/historias`;
+            await addDoc(collection(db, collectionPath), {
+                quem,
+                que,
+                porQue,
+                imagem,
+                userId,
+                createdAt: serverTimestamp()
+            });
+            showMessage("História salva com sucesso!");
+            quemInput.value = '';
+            queInput.value = '';
+            porQueInput.value = '';
+            capturedImage.src = '';
+            capturedImage.classList.add('hidden');
+            // retoma a câmera para nova captura
+            cameraPreview.classList.remove('hidden');
+            await startCamera();
+        } catch (e) {
+            console.error("Erro ao adicionar documento: ", e);
+            showMessage("Erro ao salvar a história.", "error");
+        }
+    });
+
+    // -------------------------
+    // Listener em tempo real (galeria)
+    // -------------------------
+    function setupRealtimeListener() {
+        if (!db) return;
+        const collectionPath = `artifacts/${appId}/public/data/historias`;
+        const q = query(collection(db, collectionPath));
+
+        onSnapshot(q, (querySnapshot) => {
+            gallery.innerHTML = '';
+            if (querySnapshot.empty) {
+                gallery.innerHTML = '<p class="text-center text-gray-500">Nenhuma história ainda. Seja o primeiro a criar!</p>';
                 return;
             }
+            // iterar e montar cards
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const card = document.createElement('div');
+                card.className = 'p-4 bg-white rounded shadow';
 
-            try {
-                // Public data path to be shared among all users of the app
-                const collectionPath = `artifacts/${appId}/public/data/historias`;
-                await addDoc(collection(db, collectionPath), {
-                    quem,
-                    que,
-                    porQue,
-                    imagem,
-                    userId, // Store the userId of the creator
-                    createdAt: serverTimestamp()
-                });
-                showMessage("História salva com sucesso!");
-                quemInput.value = '';
-                queInput.value = '';
-                porQueInput.value = '';
-                capturedImage.src = '';
-                capturedImage.classList.add('hidden');
-                cameraPreview.classList.remove('hidden');
-                captureBtn.textContent = 'Tirar Foto';
-                startCamera();
-            } catch (e) {
-                console.error("Erro ao adicionar documento: ", e);
-                showMessage("Erro ao salvar a história.", "error");
-            }
-        });
+                const img = document.createElement('img');
+                img.src = data.imagem || '';
+                img.alt = data.que || 'Imagem capturada';
+                img.className = 'w-full rounded mb-2';
 
-        // Set up real-time listener for gallery
-        function setupRealtimeListener() {
-            const collectionPath = `artifacts/${appId}/public/data/historias`;
-            const q = query(collection(db, collectionPath));
+                const quemEl = document.createElement('h3');
+                quemEl.className = 'font-semibold';
+                quemEl.textContent = data.quem || 'Anônimo';
 
-            onSnapshot(q, (querySnapshot) => {
-                gallery.innerHTML = '';
-                if (querySnapshot.empty) {
-                    gallery.innerHTML = '<p class="text-center text-gray-500">Nenhuma história ainda. Seja o primeiro a criar!</p>';
-                } else {
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const storyCard = document.createElement('div');
-                        storyCard.className = 'card';
-                        storyCard.innerHTML = `
-                            <img src="${data.imagem}" alt="Imagem capturada" class="w-full h-48 object-cover rounded-lg mb-4">
-                            <h3 class="text-xl font-semibold mb-2 text-gray-800">${data.quem}</h3>
-                            <p class="text-gray-600 font-medium">${data.que}</p>
-                            <p class="text-gray-500 text-sm mt-2">${data.porQue}</p>
-                            <p class="text-gray-400 text-xs mt-4">Criado por: ${data.userId}</p>
-                        `;
-                        gallery.appendChild(storyCard);
-                    });
-                }
-                loadingText.classList.add('hidden');
-            }, (error) => {
-                console.error("Erro ao carregar histórias: ", error);
-                loadingText.textContent = "Erro ao carregar histórias.";
+                const queEl = document.createElement('p');
+                queEl.textContent = data.que || '';
+
+                const porQueEl = document.createElement('p');
+                porQueEl.className = 'text-sm text-gray-600';
+                porQueEl.textContent = data.porQue || '';
+
+                card.appendChild(img);
+                card.appendChild(quemEl);
+                card.appendChild(queEl);
+                card.appendChild(porQueEl);
+
+                gallery.appendChild(card);
             });
-        }
-        
-        // Helper function for message box
-        function showMessage(msg, type = "success") {
-            messageBox.textContent = msg;
-            messageBox.style.backgroundColor = type === "success" ? "#48bb78" : "#f56565";
-            messageBox.classList.remove("hidden");
-            messageBox.classList.add("show");
-            setTimeout(() => {
-                messageBox.classList.remove("show");
-                setTimeout(() => {
-                    messageBox.classList.add("hidden");
-                }, 500);
-            }, 3000);
-        }
-
-        async function startCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                cameraPreview.srcObject = stream;
-            } catch (err) {
-                console.error("Erro ao acessar a câmera: ", err);
-                showMessage("Não foi possível acessar a câmera.", "error");
-            }
-        }
-        
-        function stopCamera() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-            }
-        }
+        }, (error) => {
+            console.error('Erro no listener Firestore:', error);
+            showMessage('Erro ao carregar histórias.', 'error');
+        });
+    }
     </script>
 </body>
 </html>
